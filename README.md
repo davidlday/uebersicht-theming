@@ -13,11 +13,11 @@ This is how I managed to put all styling in an external file. This should work f
 
 ## How To Create a Widget
 
-Gory details on why come later. Here's how to make this happen.
+Here's how to make this happen.
 
 ### Package Structure
 
-The sample assumes the widget is called ```<widget-name>.widget```, and that your repo follows this structure:
+The document assumes the widget is called ```<widget-name>.widget```, and that your repo follows this structure:
 
 ```
 <reponame>/
@@ -43,7 +43,9 @@ Create a file called ```<widget-name>.widget/styles/default.css```. This will be
 
 The [Übersicht Style Documentation](https://github.com/felixhageloh/uebersicht#style) shows how to implement a style using a string directly in the widget's script (```<widget-name>.coffee``` in our example). However, this means anytime someone wants to alter the style, they have to do so in the main script. If you update and make a new release, you're going to obliterate their custom style.
 
-Instead, we'll leverage CSS's [@import](https://www.w3.org/TR/css3-cascade/#at-ruledef-import) feature. In your widget's script file, ensure the Übersicht settings **come last**. One of them will implement the import statement, as such:
+Instead, we'll leverage CSS's [@import](https://www.w3.org/TR/css3-cascade/#at-ruledef-import) feature. Unfortunately, this only works using CSS files, so if you're using Stylus be sure to generate and check in the CSS files.
+
+In your widget's script file, ensure the Übersicht settings **come last**. One of them will implement the import statement, as such:
 
 ```coffee
 #############################
@@ -68,7 +70,7 @@ settings =
 #############################
 ```
 
-I also implelement the refresh ettings here to keep all the configurable stuff in one place. Here's how it looks together:
+I also implelement the refresh settings here to keep all the configurable stuff in one place. Here's how it looks together:
 
 ```coffee
 #############################
@@ -82,15 +84,44 @@ settings =
   refreshFrequency: '1m'
 #############################
 
+# Other Non-Übersicht Stuff Here
+
 #############################
-# Do not alter below here.
+# All Übersicht Stuff Below Here
 #############################
 
 #############################
-# CSS styling for the widget
+# command
+# https://github.com/felixhageloh/uebersicht#command
+command: 'some_cool_command.sh'
+
+#############################
+# refreshFrequency
+# https://github.com/felixhageloh/uebersicht#refreshfrequency
+refreshFrequency: settings.refreshFrequency
+
+#############################
+# style
+# https://github.com/felixhageloh/uebersicht#style
 style: """
     @import url(reminders.widget/styles/""" + settings.styleFilename + """);
 """
+
+#############################
+# render: output
+# https://github.com/felixhageloh/uebersicht#render--output
+render: (output) -> """
+  <h1>#{output}</h1>
+"""
+
+#############################
+# afterRender: domEl
+# https://github.com/felixhageloh/uebersicht#afterrender--domel
+
+#############################
+# update: output, domEl
+# https://github.com/felixhageloh/uebersicht#update--output-domel
+
 ```
 
 Now you can provide multiple styles, or allow users to implement their own, with minimal changes to the main script.
@@ -98,11 +129,5 @@ Now you can provide multiple styles, or allow users to implement their own, with
 ## Details
 
 Here are some explanations as to why this works, and why the widget has to be implemented in a specific way.
-
-### CSS vs. Stylus
-
-Per the [Writing Widgets](https://github.com/felixhageloh/uebersicht#writing-widgets) guide, [Übersicht](http://tracesof.net/uebersicht/) uses Stylus to process the ```style``` string. However, if you choose to externalize your styles to allow for theming or easy customization, you're going to have to stick with CSS because the style will be pulled in via [@import](https://www.w3.org/TR/css3-cascade/#at-ruledef-import) and bypass the stylus preprocessor. You can still create .styl files, but you'll need to process them into .css files on your own.
-
-### Widget Structure
 
 
